@@ -38,7 +38,7 @@
 <!-- ROADMAP -->
 ## What is this
 
-This is a very basic but efficient Python program for translating PDFs without touching graphics. I know there are lots of alternatives, but they are pricey 🤑 and steal your data 🤗, so this works on your local machine, nothing to worry about. 
+This is a very basic but efficient Python program for translating PDFs without touching graphics. I know there are lots of alternatives, but they are priceyyy 🤑 and _mostly_ keep your data 🤗, so this works on your local machine; nothing to worry about. 
 <br><br> 
 I was searching for worksheets for my exam, and there is a lack of resources in either English or Turkish; also, I had to keep the layout, so I created this. 
 <br><br> 
