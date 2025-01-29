@@ -37,7 +37,12 @@
 
 <!-- ROADMAP -->
 ## What is this
-This is a very basic but efficient Python program for translate PDF's without touching graphics I know there are lots of alternatives but they are pricyyy 🤑 and steals your data 🤗 so this work on your local machine nothing to worry about. <br><br> I was searching for worksheet for my exam and there are lack of resources in nor English or Turkish also I had to keep the layout so created this. <br><br> I don't have a roadmap for this project, but I uploaded it to this platform in case it helps someone, and anyone who wants to deal with it can take it and run it on a server and open a website or something.
+
+This is a very basic but efficient Python program for translating PDFs without touching graphics. I know there are lots of alternatives, but they are pricey 🤑 and steal your data 🤗, so this works on your local machine, nothing to worry about. 
+<br><br> 
+I was searching for worksheets for my exam, and there is a lack of resources in either English or Turkish; also, I had to keep the layout, so I created this. 
+<br><br> 
+I don't have a roadmap for this project, but I uploaded it to this platform in case it helps someone, and anyone who wants to deal with it can take it and run it on a server and open a website or something.
 
 <!-- - [ ] Feature 1
 - [ ] Feature 2
