@@ -1,2 +1,8 @@
-Ollama
-PyMuPDF
+# Core dependencies
+ollama>=0.1.17
+PyMuPDF>=1.22.3
+tqdm>=4.65.0
+
+# transformers>=4.34.0  # For using HuggingFace translation models
+# pdf2image>=1.16.3     # For converting PDF to images
+# pytesseract>=0.3.10   # For OCR capabilities

@@ -121,7 +121,7 @@ This is an example of how to list things you need to use the software and how to
 1. Input source and target languages (make sure your llm model supports that language)
 
 2. ```sh
-    python main.py
+    python main.py input.pdf -o translated.pdf -s English -t Spanish
     ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
