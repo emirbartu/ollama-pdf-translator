@@ -35,7 +35,6 @@
   </p>
 </div>
 
-<!-- ROADMAP -->
 ## What is this
 
 This is a very basic but efficient Python program for translating PDFs without touching graphics. I know there are lots of alternatives, but they are priceyyy 🤑 and _mostly_ keep your data 🤗, so this works on your local machine; nothing to worry about. 
@@ -65,7 +64,6 @@ See the [open issues](https://github.com/emirbartu/ollama-pdf-translator/issues)
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
