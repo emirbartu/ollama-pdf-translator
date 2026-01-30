@@ -157,8 +157,13 @@ class PDFTranslator:
                             logger.error(f"Error translating block: {str(e)}")
                             continue
 
-            # Save the translated PDF
-            doc.save(output_pdf)
+            # Save the translated PDF with compression
+            doc.save(
+                output_pdf,
+                garbage=4,      # Maximum garbage collection
+                deflate=True,   # Compress content streams
+                clean=True      # Clean and sanitize PDF structure
+            )
             logger.info(f"Translated PDF saved as {output_pdf}")
         except Exception as e:
             raise PDFError(f"Error processing PDF: {e}")
