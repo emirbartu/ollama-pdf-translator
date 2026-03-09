@@ -151,7 +151,7 @@ Distributed under the MIT licence.
 <!-- CONTACT -->
 ## Contact
 
-Emir Bartu Ekinci - [@geryuz42](https://twitter.com/geryuz42) - bartuekinci42@gmail.com
+Emir Bartu Ekinci - bartuekinci42@gmail.com
 <!-- 
 Project Link: [https://github.com/emirbartu/ollama-pdf-translator](https://github.com/emirbartu/ollama-pdf-translator) -->
 
