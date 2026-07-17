@@ -3,20 +3,23 @@ import logging
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import fitz  # PyMuPDF
-import ollama
+from dotenv import load_dotenv
+from openai import OpenAI
 from tqdm import tqdm
 
+load_dotenv()
+
 # Configure logging
+_log_handlers: list[logging.Handler] = [logging.StreamHandler()]
+if not os.environ.get("VERCEL"):  # Vercel filesystem is read-only
+    _log_handlers.append(logging.FileHandler("pdf_translator.log"))
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("pdf_translator.log"),
-    ],
+    handlers=_log_handlers,
 )
 logger = logging.getLogger("pdf_translator")
 
@@ -46,7 +49,7 @@ class TranslationConfig:
     """
     source_lang: str
     target_lang: str
-    model: str = "llama3.2"
+    model: str = "gpt-oss:120b"
     fallback_font: str = "helvetica"
     batch_size: int = 10
     skip_pages: List[int] = None
@@ -83,30 +86,21 @@ class PDFTranslator:
             config: Translation configuration
         """
         self.config = config
-        try:
-            self._check_ollama_availability()
-        except Exception as e:
-            raise TranslationError(f"Ollama service unavailable: {e}")
-    
-    def _check_ollama_availability(self):
-        """Check if Ollama service is available and model is loaded."""
-        try:
-            models = ollama.list()
-            available_models = [model.get('name') for model in models.get('models', [])]
-            if self.config.model not in available_models:
-                logger.warning(f"Model {self.config.model} not found in available models: {available_models}")
-                logger.info(f"Pulling model {self.config.model}...")
-                ollama.pull(self.config.model)
-        except Exception as e:
-            raise TranslationError(f"Failed to connect to Ollama service: {e}")
+        api_key = os.environ.get("OLLAMA_API_KEY")
+        if not api_key:
+            raise TranslationError("OLLAMA_API_KEY environment variable is not set")
+        self.client = OpenAI(base_url="https://ollama.com/v1", api_key=api_key)
 
-    def translate_pdf(self, input_pdf: Union[str, Path], output_pdf: Union[str, Path]) -> None:
+    def translate_pdf(self, input_pdf: Union[str, Path], output_pdf: Union[str, Path],
+                      progress_callback: Optional[Callable[[int, int], None]] = None) -> None:
         """Translate a PDF file.
-        
+
         Args:
             input_pdf: Path to input PDF file
             output_pdf: Path to output PDF file
-        
+            progress_callback: Optional callable invoked as (current_page, total_pages)
+                at the start of each page (1-indexed)
+
         Raises:
             PDFError: If PDF processing fails
             TranslationError: If translation fails
@@ -126,6 +120,8 @@ class PDFTranslator:
             logger.info(f"Processing PDF with {total_pages} pages")
             
             for page_num in tqdm(range(total_pages), desc="Translating pages"):
+                if progress_callback:
+                    progress_callback(page_num + 1, total_pages)
                 if page_num in self.config.skip_pages:
                     logger.info(f"Skipping page {page_num+1}/{total_pages}")
                     continue
@@ -414,7 +410,7 @@ class PDFTranslator:
             Provide ONLY the translated text with no additional comments or explanations.
             """
             
-            response = ollama.chat(
+            response = self.client.chat.completions.create(
                 model=self.config.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -422,7 +418,7 @@ class PDFTranslator:
                 ]
             )
 
-            translated_text = response['message']['content'].strip()
+            translated_text = response.choices[0].message.content.strip()
             if not translated_text:
                 raise TranslationError("Empty translation received")
 
@@ -438,10 +434,11 @@ def translate_pdf(
     output_pdf: Union[str, Path] = None,
     source_lang: str = "English",
     target_lang: str = "Spanish",
-    model: str = "llama3.2",
+    model: str = "gpt-oss:120b",
     skip_pages: List[int] = None,
     preserve_layout: bool = True,
-    fallback_font: str = "helvetica"
+    fallback_font: str = "helvetica",
+    progress_callback: Optional[Callable[[int, int], None]] = None
 ) -> Optional[Path]:
     """Translate a PDF file.
     
@@ -479,7 +476,7 @@ def translate_pdf(
         )
         
         translator = PDFTranslator(config)
-        translator.translate_pdf(input_pdf, output_pdf)
+        translator.translate_pdf(input_pdf, output_pdf, progress_callback=progress_callback)
         
         return output_pdf
         
@@ -498,7 +495,7 @@ def main():
     parser.add_argument("-o", "--output", help="Path to output PDF file")
     parser.add_argument("-s", "--source", default="English", help="Source language")
     parser.add_argument("-t", "--target", default="Spanish", help="Target language")
-    parser.add_argument("-m", "--model", default="llama3.2", help="Ollama model to use")
+    parser.add_argument("-m", "--model", default="gpt-oss:120b", help="Ollama Cloud model to use")
     parser.add_argument("--skip-pages", type=int, nargs="*", help="Pages to skip (0-indexed)")
     parser.add_argument("--no-preserve-layout", action="store_false", dest="preserve_layout", 
                         help="Do not preserve original layout")

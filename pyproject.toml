@@ -1,0 +1,21 @@
+[project]
+name = "ollama-pdf-translator"
+version = "0.1.0"
+description = "Translate PDFs locally for free using Ollama and PyMuPDF — CLI and web demo"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "openai>=1.50",
+    "python-dotenv>=1.0",
+    "PyMuPDF>=1.22.3",
+    "tqdm>=4.65.0",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "python-multipart>=0.0.9",
+    "jinja2>=3.1",
+    "slowapi>=0.1.9",
+]
+
+[tool.uv]
+package = false
