@@ -590,6 +590,33 @@ body.modal-open { overflow: hidden; }
 
 .back-link:hover { color: var(--accent-2); }
 
+/* GitHub popup (portfolio) */
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  border-radius: 11px;
+  transition: opacity 0.15s ease;
+}
+
+.github-link:hover { opacity: 0.9; }
+
+.github-sub {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Card headings                                                      */
 /* ------------------------------------------------------------------ */
