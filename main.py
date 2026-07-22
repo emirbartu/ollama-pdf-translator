@@ -34,6 +34,8 @@ class PDFError(Exception):
     pass
 
 
+LOCAL_OLLAMA_URL = "http://localhost:11434/v1"
+
 @dataclass
 class TranslationConfig:
     """Configuration for PDF translation.
@@ -41,7 +43,9 @@ class TranslationConfig:
     Attributes:
         source_lang: Source language code or name
         target_lang: Target language code or name
-        model: Ollama model to use for translation
+        model: Model name to use for translation
+        base_url: OpenAI-compatible API base URL (None = auto-detect)
+        api_key: API key for the endpoint (None = auto-detect)
         fallback_font: Font to use if original font is not available
         batch_size: Number of text blocks to translate in one batch
         skip_pages: List of page numbers to skip (0-indexed)
@@ -50,6 +54,8 @@ class TranslationConfig:
     source_lang: str
     target_lang: str
     model: str = "gpt-oss:120b"
+    base_url: Optional[str] = None
+    api_key: Optional[str] = None
     fallback_font: str = "helvetica"
     batch_size: int = 10
     skip_pages: List[int] = None
@@ -74,22 +80,35 @@ class TranslationConfig:
 
 
 class PDFTranslator:
-    """PDF translator using Ollama LLM.
-    
+    """PDF translator using any OpenAI-compatible LLM endpoint.
+
+    Works with a local Ollama server (default) or any OpenAI-compatible API
+    (OpenAI, OpenRouter, LM Studio, ...).
     This class handles the extraction, translation, and replacement of text in PDF files.
     """
-    
+
     def __init__(self, config: TranslationConfig):
         """Initialize the PDF translator.
-        
+
         Args:
             config: Translation configuration
         """
         self.config = config
-        api_key = os.environ.get("OLLAMA_API_KEY")
-        if not api_key:
-            raise TranslationError("OLLAMA_API_KEY environment variable is not set")
-        self.client = OpenAI(base_url="https://ollama.com/v1", api_key=api_key)
+        base_url, api_key = self._resolve_backend()
+        self.client = OpenAI(base_url=base_url, api_key=api_key)
+        logger.info(f"Using LLM backend: {base_url} (model: {config.model})")
+
+    def _resolve_backend(self) -> Tuple[str, str]:
+        """Resolve the OpenAI-compatible endpoint and credentials.
+
+        Priority:
+            1. Explicit config (CLI --base-url / --api-key)
+            2. Environment variables (OPENAI_BASE_URL, OPENAI_API_KEY)
+            3. Local Ollama default
+        """
+        base_url = self.config.base_url or os.environ.get("OPENAI_BASE_URL") or LOCAL_OLLAMA_URL
+        api_key = self.config.api_key or os.environ.get("OPENAI_API_KEY") or "ollama"  # local servers ignore the key; SDK requires non-empty
+        return base_url, api_key
 
     def translate_pdf(self, input_pdf: Union[str, Path], output_pdf: Union[str, Path],
                       progress_callback: Optional[Callable[[int, int], None]] = None) -> None:
@@ -438,33 +457,37 @@ def translate_pdf(
     skip_pages: List[int] = None,
     preserve_layout: bool = True,
     fallback_font: str = "helvetica",
+    base_url: Optional[str] = None,
+    api_key: Optional[str] = None,
     progress_callback: Optional[Callable[[int, int], None]] = None
 ) -> Optional[Path]:
     """Translate a PDF file.
-    
+
     Args:
         input_pdf: Path to input PDF file
         output_pdf: Path to output PDF file (default: input filename with _translated suffix)
         source_lang: Source language
         target_lang: Target language
-        model: Ollama model to use
+        model: Model name to use
         skip_pages: List of page numbers to skip (0-indexed)
         preserve_layout: Whether to preserve original layout
         fallback_font: Font to use if original font is not available
-        
+        base_url: OpenAI-compatible API base URL (default: auto-detect)
+        api_key: API key for the endpoint (default: auto-detect)
+
     Returns:
         Path to translated PDF or None if translation failed
     """
     input_pdf = Path(input_pdf)
-    
+
     if output_pdf is None:
         output_pdf = input_pdf.with_stem(f"{input_pdf.stem}_translated")
     else:
         output_pdf = Path(output_pdf)
-    
+
     if output_pdf.exists():
         logger.warning(f"Warning: Overwriting existing file: {output_pdf}")
-    
+
     try:
         config = TranslationConfig(
             source_lang=source_lang,
@@ -472,7 +495,9 @@ def translate_pdf(
             model=model,
             skip_pages=skip_pages or [],
             preserve_layout=preserve_layout,
-            fallback_font=fallback_font
+            fallback_font=fallback_font,
+            base_url=base_url,
+            api_key=api_key
         )
         
         translator = PDFTranslator(config)
@@ -490,19 +515,26 @@ def translate_pdf(
 
 def main():
     """Command line interface for PDF translator."""
-    parser = argparse.ArgumentParser(description="Translate PDF files using Ollama")
+    parser = argparse.ArgumentParser(
+        description="Translate PDF files with any OpenAI-compatible LLM (local Ollama by default)"
+    )
     parser.add_argument("input_pdf", help="Path to input PDF file")
     parser.add_argument("-o", "--output", help="Path to output PDF file")
     parser.add_argument("-s", "--source", default="English", help="Source language")
     parser.add_argument("-t", "--target", default="Spanish", help="Target language")
-    parser.add_argument("-m", "--model", default="gpt-oss:120b", help="Ollama Cloud model to use")
+    parser.add_argument("-m", "--model", default=os.environ.get("LLM_MODEL", "llama3.2"),
+                        help="Model name, e.g. llama3.2, gpt-4o-mini (default: LLM_MODEL env or llama3.2)")
+    parser.add_argument("--base-url", default=os.environ.get("OPENAI_BASE_URL"),
+                        help="OpenAI-compatible API base URL (default: OPENAI_BASE_URL env or http://localhost:11434/v1)")
+    parser.add_argument("--api-key", default=os.environ.get("OPENAI_API_KEY"),
+                        help="API key for the endpoint (default: OPENAI_API_KEY env)")
     parser.add_argument("--skip-pages", type=int, nargs="*", help="Pages to skip (0-indexed)")
-    parser.add_argument("--no-preserve-layout", action="store_false", dest="preserve_layout", 
+    parser.add_argument("--no-preserve-layout", action="store_false", dest="preserve_layout",
                         help="Do not preserve original layout")
     parser.add_argument("--font", default="helvetica", help="Fallback font")
-    
+
     args = parser.parse_args()
-    
+
     result = translate_pdf(
         input_pdf=args.input_pdf,
         output_pdf=args.output,
@@ -511,7 +543,9 @@ def main():
         model=args.model,
         skip_pages=args.skip_pages,
         preserve_layout=args.preserve_layout,
-        fallback_font=args.font
+        fallback_font=args.font,
+        base_url=args.base_url,
+        api_key=args.api_key
     )
     
     if result is None:

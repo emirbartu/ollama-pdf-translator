@@ -25,6 +25,7 @@ body {
 }
 
 .page {
+  position: relative;
   width: 100%;
   max-width: 720px;
   padding: 64px 20px 40px;
@@ -131,7 +132,8 @@ body {
   letter-spacing: 0.05em;
 }
 
-.field input {
+.field input,
+.field select {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -143,7 +145,24 @@ body {
   width: 100%;
 }
 
-.field input:focus { border-color: var(--accent); }
+.field input:focus,
+.field select:focus { border-color: var(--accent); }
+
+.field select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238b94a7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 38px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.field select option {
+  background: var(--card);
+  color: var(--text);
+}
 
 .arrow { color: var(--muted); flex-shrink: 0; margin-bottom: 11px; }
 
@@ -261,4 +280,439 @@ body {
 @media (max-width: 520px) {
   .fields { flex-direction: column; align-items: stretch; }
   .arrow { display: none; }
+  .connection-fields { gap: 14px; }
+}
+
+/* Panels */
+.panel[hidden] { display: none; }
+
+/* Tabs — segmented control */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.tab {
+  flex: 1;
+  padding: 9px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.tab:hover { color: var(--text); }
+
+.tab.active {
+  color: #fff;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  box-shadow: 0 2px 8px rgba(124, 108, 255, 0.3);
+}
+
+a.tab {
+  text-decoration: none;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Connection section */
+.connection {
+  background: rgba(124, 108, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 22px;
+}
+
+.connection-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 14px;
+}
+
+.connection-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.connection-hint {
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Self-host card */
+.selfhost-card { padding: 32px 28px; }
+
+.selfhost-heading {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.selfhost-intro {
+  font-size: 14.5px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 28px;
+}
+
+.steps {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.step-badge {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  border-radius: 50%;
+  margin-top: 2px;
+}
+
+.step-body { flex: 1; min-width: 0; }
+
+.step-text {
+  font-size: 14.5px;
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+
+.step-text a {
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.step-text a:hover { color: var(--accent); }
+
+.code-block {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.code-block pre {
+  padding: 14px 70px 14px 16px;
+  overflow-x: auto;
+  margin: 0;
+}
+
+.code-block code {
+  font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+  font-size: 13px;
+  color: var(--accent-2);
+  white-space: pre;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.copy-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.copy-btn.copied {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Info button                                                        */
+/* ------------------------------------------------------------------ */
+
+#info-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  z-index: 2;
+}
+
+#info-btn:hover {
+  color: var(--accent-2);
+  border-color: var(--accent);
+  background: rgba(124, 108, 255, 0.08);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Modal                                                              */
+/* ------------------------------------------------------------------ */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal[hidden] { display: none; }
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+.modal-card {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 32px 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  max-width: 640px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  z-index: 1;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.modal-close:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.selfhost-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 28px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  border-radius: 10px;
+  transition: opacity 0.15s ease;
+}
+
+.selfhost-link:hover { opacity: 0.9; }
+
+body.modal-open { overflow: hidden; }
+
+/* ------------------------------------------------------------------ */
+/*  Back link                                                          */
+/* ------------------------------------------------------------------ */
+
+.back-link {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+  align-self: flex-start;
+}
+
+.back-link:hover { color: var(--accent-2); }
+
+/* ------------------------------------------------------------------ */
+/*  Card headings                                                      */
+/* ------------------------------------------------------------------ */
+
+.card-heading {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Ollama status & retry                                              */
+/* ------------------------------------------------------------------ */
+
+#ollama-status {
+  margin-bottom: 4px;
+}
+
+#ollama-status .status {
+  margin-top: 0;
+}
+
+.status-detail {
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.status-detail a {
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.status-detail a:hover { color: var(--accent); }
+
+.status-actions {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.retry-btn {
+  align-self: flex-start;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.retry-btn:hover {
+  color: var(--accent-2);
+  border-color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Model field (self-host form)                                       */
+/* ------------------------------------------------------------------ */
+
+.model-field {
+  margin-bottom: 22px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Guide card extras                                                  */
+/* ------------------------------------------------------------------ */
+
+.guide-card .steps {
+  gap: 28px;
+}
+
+.step-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.step-note {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.step-note code {
+  font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--accent-2);
+  background: rgba(124, 108, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Footer link                                                        */
+/* ------------------------------------------------------------------ */
+
+.footer a {
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer a:hover { color: var(--accent); }
+
+/* ------------------------------------------------------------------ */
+/*  Responsive                                                         */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 520px) {
+  .modal { padding: 12px; }
+  .modal-card { padding: 24px 20px; border-radius: 14px; }
+  .modal-close { top: 12px; right: 12px; }
+  #info-btn { top: 14px; right: 14px; width: 36px; height: 36px; }
+  #info-btn svg { width: 18px; height: 18px; }
 }

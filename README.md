@@ -1,32 +1,12 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a id="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
 
-
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-<!-- PROJECT LOGO -->
-<br />
 <div align="center">
-  <a href="https://github.com/emirbartu/ollama-pdf-translator">
-  </a>
+  <a href="https://github.com/emirbartu/ollama-pdf-translator"></a>
 
-<h3 align="center">Ollama PDF Translator</h3>
+  <h3 align="center">Ollama PDF Translator</h3>
 
   <p align="center">
-    A simple Python script that translates PDFs for free using Ollama and PyMuPDF.
+    Translate PDFs with an LLM — locally for free, or through any OpenAI-compatible API. Layout and graphics preserved.
     <br />
     &middot;
     <a href="https://github.com/emirbartu/ollama-pdf-translator/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
@@ -37,92 +17,104 @@
 
 ## What is this
 
-This is a very basic but efficient Python program for translating PDFs without touching graphics. I know there are lots of alternatives, but they are priceyyy 🤑 and _mostly_ keep your data 🤗, so this works on your local machine; nothing to worry about. 
-<br><br> 
-I was searching for worksheets for my exam, and there is a lack of resources in either English or Turkish; also, I had to keep the layout, so I created this. 
-<br><br> 
-I don't have a roadmap for this project, but I uploaded it to this platform in case it helps someone, and anyone who wants to deal with it can take it and run it on a server and open a website or something.
+A simple but efficient Python program for translating PDFs without touching graphics. There are lots of alternatives, but they are priceyyy 🤑 and _mostly_ keep your data 🤗 — this one runs wherever you want:
 
-<!-- - [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
-See the [open issues](https://github.com/emirbartu/ollama-pdf-translator/issues) for a full list of proposed features (and known issues). -->
+- **Local Ollama** (default) — free, private, nothing leaves your machine
+- **Any OpenAI-compatible API** — OpenAI, OpenRouter, LM Studio, vLLM, you name it
 
+I was searching for worksheets for my exam, and there is a lack of resources in either English or Turkish; also, I had to keep the layout, so I created this.
 
+It ships as both a **CLI** and a **web demo** (FastAPI, deployable to Vercel).
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <!-- <li><a href="#built-with">Built With</a></li> -->
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <!-- <li><a href="#acknowledgments">Acknowledgments</a></li> -->
-  </ol>
-</details>
-
-<!-- ### Built With
-
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
- -->
-
-<!-- GETTING STARTED -->
 ## Getting Started
-
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* [Ollama installation](https://ollama.com/) 
-  ```sh
-    ollama run [your model]
-  ```
+Pick a backend:
+
+| Backend | What you need |
+|---|---|
+| Local Ollama (default) | [Ollama](https://ollama.com/) installed + a model pulled, e.g. `ollama pull llama3.2` |
+| OpenAI-compatible API | Base URL + API key (e.g. `https://api.openai.com/v1` + OpenAI key) |
 
 ### Installation
 
 1. Clone the repo
    ```sh
    git clone https://github.com/emirbartu/ollama-pdf-translator.git
+   cd ollama-pdf-translator
    ```
-2.  [venv setup](https://freecodecamp.org/news/how-to-setup-virtual-environments-in-python/) 
+2. Install dependencies (pick one):
+   ```sh
+   # with uv (recommended)
+   uv sync
 
-3. ```sh
-    pip install -r requirements.txt
-    ```
+   # or with pip
+   pip install openai python-dotenv PyMuPDF tqdm fastapi "uvicorn[standard]" python-multipart jinja2 slowapi
+   ```
+3. (Optional) copy `.env.example` to `.env` and fill in your keys. For local Ollama you don't need to configure anything.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
-<!-- USAGE EXAMPLES -->
 ## Usage
 
-1. ```sh
-    python main.py input.pdf -o translated.pdf -s English -t Spanish
-    ```
+### CLI
+
+**Local Ollama** (default — no config needed):
+
+```sh
+python main.py input.pdf -o translated.pdf -s English -t Spanish -m llama3.2
+```
+
+**Any OpenAI-compatible API** (e.g. OpenAI):
+
+```sh
+python main.py input.pdf -o translated.pdf -s English -t German \
+  -m gpt-4o-mini --base-url https://api.openai.com/v1 --api-key sk-...
+```
+
+All options:
+
+| Flag | Default | Description |
+|---|---|---|
+| `input_pdf` | — | Path to input PDF |
+| `-o`, `--output` | `<name>_translated.pdf` | Output path |
+| `-s`, `--source` | `English` | Source language |
+| `-t`, `--target` | `Spanish` | Target language |
+| `-m`, `--model` | `$LLM_MODEL` or `llama3.2` | Model name (e.g. `llama3.2`, `gpt-4o-mini`) |
+| `--base-url` | auto-detect | OpenAI-compatible API base URL |
+| `--api-key` | auto-detect | API key for the endpoint |
+| `--skip-pages` | none | Pages to skip (0-indexed) |
+| `--no-preserve-layout` | off | Don't preserve original layout |
+| `--font` | `helvetica` | Fallback font |
+
+Backend auto-detection order: `--base-url` flag → `OPENAI_BASE_URL` env → local Ollama at `http://localhost:11434/v1`.
+
+### Web demo
+
+A small FastAPI web UI with a language selector, drag & drop upload, and live progress:
+
+```sh
+uvicorn app:app --host 127.0.0.1 --port 8000
+# open http://127.0.0.1:8000
+```
+
+The cloud demo runs on **visitor-provided API keys (BYOK)** — visitors point the demo at any OpenAI-compatible endpoint with their own key. Keys are used only for that request, never stored or logged. To keep the hosted demo from being abused it is deliberately limited: **max 3 pages, max 1 MB, 5 translations/hour + 20/day per IP**. The visitor model defaults to `gpt-4o-mini`.
+
+When you run the app locally, the **/self-host** page lists your installed Ollama models (`ollama list`) and lets you pick one and translate with it directly in the browser — along with a full self-hosting guide.
+
+Deploying to [Vercel](https://vercel.com/) works out of the box (`vercel.json` included) — no environment variables needed thanks to BYOK. Optionally set `OPENAI_API_KEY` + `OPENAI_BASE_URL` (and `LLM_MODEL`) as a server-side fallback so visitors can leave the key field empty.
+
+### Environment variables
+
+| Variable | Used for |
+|---|---|
+| `OPENAI_BASE_URL` | Any OpenAI-compatible endpoint (overrides auto-detection) |
+| `OPENAI_API_KEY` | Key for that endpoint; also the web demo's server-side fallback |
+| `LLM_MODEL` | Model name used by CLI default and the web demo fallback |
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-<!-- CONTRIBUTING -->
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
@@ -130,74 +122,16 @@ Contributions are what make the open source community such an amazing place to l
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
 Don't forget to give the project a star! Thanks again!
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-<!-- 
-### Top contributors:
-
-<a href="https://github.com/emirbartu/ollama-pdf-translator/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=github_username/repo_name" alt="contrib.rocks image" />
-</a>
-
- -->
-
-<!-- LICENSE -->
 ## License
 
 Distributed under the MIT licence.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-<!-- CONTACT -->
 ## Contact
 
 Emir Bartu Ekinci - bartuekinci42@gmail.com
-<!-- 
-Project Link: [https://github.com/emirbartu/ollama-pdf-translator](https://github.com/emirbartu/ollama-pdf-translator) -->
+
+Project Link: [https://github.com/emirbartu/ollama-pdf-translator](https://github.com/emirbartu/ollama-pdf-translator)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS
-## Acknowledgments
-
-* []()
-* []()
-* []()
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p> -->
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
-[contributors-url]: https://github.com/emirbartu/ollama-pdf-translator/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
-[forks-url]: https://github.com/emirbartu/ollama-pdf-translator/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
-[stars-url]: https://github.com/emirbartu/ollama-pdf-translator/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[issues-url]: https://github.com/emirbartu/ollama-pdf-translator/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/emirbartu/ollama-pdf-translator/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/bartuekinci
-[product-screenshot]: images/screenshot.png
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
-[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-[React-url]: https://reactjs.org/
-[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
-[Vue-url]: https://vuejs.org/
-[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
-[Angular-url]: https://angular.io/
-[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
-[Svelte-url]: https://svelte.dev/
-[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
-[Laravel-url]: https://laravel.com
-[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
-[Bootstrap-url]: https://getbootstrap.com
-[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 

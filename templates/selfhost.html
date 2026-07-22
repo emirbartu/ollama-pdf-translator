@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self-hosting — Ollama PDF Translator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <script type="module" src="/static/app.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <h1>Self-hosting</h1>
+      <p class="pitch">Run the translator on your own machine — free, private, unlimited.</p>
+    </header>
+
+    <nav class="tabs" aria-label="Mode">
+      <a class="tab" href="/">Cloud</a>
+      <a class="tab active" href="/self-host" aria-current="page">Self host</a>
+    </nav>
+
+    <section class="card">
+      <h2 class="card-heading">Run locally with your Ollama models</h2>
+
+      <div id="ollama-status">
+        <div class="status-row">
+          <span class="spinner"></span>
+          <span class="status-title">Checking for Ollama…</span>
+        </div>
+      </div>
+
+      <form id="upload-form" onsubmit="return startTranslation(event)" hidden>
+        <input type="hidden" name="base_url" value="http://localhost:11434/v1" />
+        <input type="hidden" name="api_key" value="ollama" />
+
+        <div class="field model-field">
+          <label for="model-select">Model</label>
+          <select name="model" id="model-select" required></select>
+        </div>
+
+        <label id="dropzone" for="file-input">
+          <input id="file-input" name="file" type="file" accept="application/pdf" required />
+          <svg class="dz-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+          <span id="dz-text" class="dz-text">Drop your PDF here or <span class="dz-browse">browse</span></span>
+          <span class="dz-hint">PDF only · max 3 pages · max 1 MB</span>
+        </label>
+
+        <div class="fields">
+          <div class="field">
+            <label for="source_lang">Source language</label>
+            <select id="source_lang" name="source_lang" required>
+              {% for lang in languages %}
+              <option value="{{ lang }}"{% if lang == "English" %} selected{% endif %}>{{ lang }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <svg class="arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          <div class="field">
+            <label for="target_lang">Target language</label>
+            <select id="target_lang" name="target_lang" required>
+              {% for lang in languages %}
+              <option value="{{ lang }}"{% if lang == "Turkish" %} selected{% endif %}>{{ lang }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <label class="checkbox">
+          <input type="checkbox" name="preserve_layout" checked />
+          <span>Preserve original layout</span>
+        </label>
+
+        <button type="submit" class="submit">Translate</button>
+      </form>
+
+      <div id="status"></div>
+    </section>
+
+    <section class="card guide-card">
+      <h2 class="card-heading">Full self-hosting guide</h2>
+
+      <ol class="steps">
+        <li class="step">
+          <span class="step-badge">1</span>
+          <div class="step-body">
+            <h3 class="step-heading">Install Ollama</h3>
+            <p class="step-text">Download from <a href="https://ollama.com" target="_blank" rel="noopener">ollama.com</a> — macOS and Windows have desktop apps, Linux uses a one-liner:</p>
+            <div class="code-block">
+              <pre><code>curl -fsSL https://ollama.com/install.sh | sh</code></pre>
+              <button type="button" class="copy-btn" aria-label="Copy command" data-copy="curl -fsSL https://ollama.com/install.sh | sh">Copy</button>
+            </div>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step-badge">2</span>
+          <div class="step-body">
+            <h3 class="step-heading">Pull a model</h3>
+            <p class="step-text">Any chat model works. Start with a small, fast one:</p>
+            <div class="code-block">
+              <pre><code>ollama pull llama3.2</code></pre>
+              <button type="button" class="copy-btn" aria-label="Copy command" data-copy="ollama pull llama3.2">Copy</button>
+            </div>
+            <p class="step-note">Other options: <code>ollama pull qwen2.5</code> or <code>ollama pull mistral</code>.</p>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step-badge">3</span>
+          <div class="step-body">
+            <h3 class="step-heading">Get the code</h3>
+            <p class="step-text">Clone the repository and install dependencies with <a href="https://docs.astral.sh/uv/" target="_blank" rel="noopener">uv</a> (or use pip — see note below):</p>
+            <div class="code-block">
+              <pre><code>git clone https://github.com/emirbartu/ollama-pdf-translator.git &amp;&amp; cd ollama-pdf-translator &amp;&amp; uv sync</code></pre>
+              <button type="button" class="copy-btn" aria-label="Copy command" data-copy="git clone https://github.com/emirbartu/ollama-pdf-translator.git &amp;&amp; cd ollama-pdf-translator &amp;&amp; uv sync">Copy</button>
+            </div>
+            <p class="step-note">Prefer pip? Run <code>pip install openai python-dotenv PyMuPDF tqdm fastapi "uvicorn[standard]" python-multipart jinja2 slowapi</code> instead.</p>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step-badge">4</span>
+          <div class="step-body">
+            <h3 class="step-heading">Translate from the terminal</h3>
+            <p class="step-text">Point it at a PDF and pick your languages:</p>
+            <div class="code-block">
+              <pre><code>python main.py input.pdf -s English -t Turkish -m llama3.2</code></pre>
+              <button type="button" class="copy-btn" aria-label="Copy command" data-copy="python main.py input.pdf -s English -t Turkish -m llama3.2">Copy</button>
+            </div>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step-badge">5</span>
+          <div class="step-body">
+            <h3 class="step-heading">Run this web UI</h3>
+            <p class="step-text">Launch the server, then open it in your browser:</p>
+            <div class="code-block">
+              <pre><code>uvicorn app:app</code></pre>
+              <button type="button" class="copy-btn" aria-label="Copy command" data-copy="uvicorn app:app">Copy</button>
+            </div>
+            <p class="step-note">Open <a href="http://127.0.0.1:8000" target="_blank" rel="noopener">http://127.0.0.1:8000</a> — the model picker above works right here once Ollama is running.</p>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step-badge">6</span>
+          <div class="step-body">
+            <h3 class="step-heading">Optional: Ollama on another machine</h3>
+            <p class="step-text">Run Ollama on a beefy server and point this app at it via <code>.env</code>:</p>
+            <div class="code-block">
+              <pre><code>OPENAI_BASE_URL=http://your-server:11434/v1</code></pre>
+              <button type="button" class="copy-btn" aria-label="Copy command" data-copy="OPENAI_BASE_URL=http://your-server:11434/v1">Copy</button>
+            </div>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step-badge">7</span>
+          <div class="step-body">
+            <h3 class="step-heading">Optional: any OpenAI-compatible API</h3>
+            <p class="step-text">Use OpenAI, OpenRouter, LM Studio, or any compatible endpoint — set both variables in <code>.env</code>:</p>
+            <div class="code-block">
+              <pre><code>OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_API_KEY=sk-your-key-here</code></pre>
+              <button type="button" class="copy-btn" aria-label="Copy command" data-copy="OPENAI_BASE_URL=https://api.openai.com/v1&#10;OPENAI_API_KEY=sk-your-key-here">Copy</button>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <footer class="footer">
+      Ollama PDF Translator · Open source on <a href="https://github.com/emirbartu/ollama-pdf-translator" target="_blank" rel="noopener">GitHub</a>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      var statusEl = document.getElementById('ollama-status');
+      var form = document.getElementById('upload-form');
+      var modelSelect = document.getElementById('model-select');
+
+      function setStatus(html) {
+        statusEl.innerHTML = html;
+      }
+
+      function loadingState() {
+        setStatus('<div class="status-row"><span class="spinner"></span><span class="status-title">Checking for Ollama…</span></div>');
+      }
+
+      function successState(count) {
+        setStatus('<div class="status done"><div class="status-row">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+          '<span class="status-title">Ollama detected · ' + count + ' model' + (count !== 1 ? 's' : '') + ' installed</span></div></div>');
+      }
+
+      function noModelsState() {
+        setStatus('<div class="status error"><div class="status-row">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+          '<span class="status-title">Ollama is running but no models are installed yet</span></div>' +
+          '<div class="status-actions">' +
+          '<div class="code-block"><pre><code>ollama pull llama3.2</code></pre>' +
+          '<button type="button" class="copy-btn" aria-label="Copy command" data-copy="ollama pull llama3.2">Copy</button></div>' +
+          '<button type="button" id="ollama-retry" class="retry-btn">Check again</button>' +
+          '</div></div>');
+        wireRetry();
+        wireCopyBtn(statusEl.querySelector('.copy-btn'));
+      }
+
+      function errorState(errorMsg) {
+        var isNotInstalled = /not installed/i.test(errorMsg);
+        var isServeNeeded = /ollama serve/i.test(errorMsg);
+        var detail = '';
+
+        if (isNotInstalled) {
+          detail = '<p class="status-detail">Install Ollama from <a href="https://ollama.com" target="_blank" rel="noopener">ollama.com</a> to use local models.</p>';
+        } else if (isServeNeeded) {
+          detail = '<div class="status-actions">' +
+            '<div class="code-block"><pre><code>ollama serve</code></pre>' +
+            '<button type="button" class="copy-btn" aria-label="Copy command" data-copy="ollama serve">Copy</button></div></div>';
+        }
+
+        setStatus('<div class="status error"><div class="status-row">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+          '<span class="status-title">' + escapeHtml(errorMsg) + '</span></div>' +
+          detail +
+          '<div class="status-actions"><button type="button" id="ollama-retry" class="retry-btn">Check again</button></div></div>');
+        wireRetry();
+        var cb = statusEl.querySelector('.copy-btn');
+        if (cb) wireCopyBtn(cb);
+      }
+
+      function fetchFailState() {
+        setStatus('<div class="status error"><div class="status-row">' +
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+          '<span class="status-title">Could not reach the server.</span></div>' +
+          '<div class="status-actions"><button type="button" id="ollama-retry" class="retry-btn">Check again</button></div></div>');
+        wireRetry();
+      }
+
+      function escapeHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      function wireRetry() {
+        var r = document.getElementById('ollama-retry');
+        if (r) r.addEventListener('click', fetchModels);
+      }
+
+      function wireCopyBtn(btn) {
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+          var text = btn.getAttribute('data-copy');
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () { copyFb(btn); });
+          } else {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); copyFb(btn); } catch (_e) { /* noop */ }
+            document.body.removeChild(ta);
+          }
+        });
+      }
+
+      function copyFb(btn) {
+        var orig = btn.textContent;
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        setTimeout(function () { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
+      }
+
+      function populateModels(models) {
+        modelSelect.innerHTML = '';
+        models.forEach(function (m) {
+          var opt = document.createElement('option');
+          opt.value = m;
+          opt.textContent = m;
+          modelSelect.appendChild(opt);
+        });
+        form.hidden = false;
+      }
+
+      async function fetchModels() {
+        loadingState();
+        form.hidden = true;
+        try {
+          var res = await fetch('/api/ollama/models');
+          if (!res.ok) { fetchFailState(); return; }
+          var data = await res.json();
+          if (data.available && data.models.length > 0) {
+            successState(data.models.length);
+            populateModels(data.models);
+          } else if (data.available) {
+            noModelsState();
+          } else {
+            errorState(data.error || 'Ollama is not available.');
+          }
+        } catch (_e) {
+          fetchFailState();
+        }
+      }
+
+      fetchModels();
+    })();
+  </script>
+</body>
+</html>
